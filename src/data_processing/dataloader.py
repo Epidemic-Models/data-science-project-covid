@@ -1,7 +1,6 @@
-import numpy as np
 import requests
 import pandas as pd
-import os
+
 
 
 def main():
@@ -18,7 +17,6 @@ def main():
         df1 = df_list1[-1]
         df = df.append(df1)
     df.to_csv("covid.csv", index=False)
-
 
 
 if __name__ == "__main__":
