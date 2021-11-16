@@ -17,7 +17,7 @@ def main():
         df_list1 = pd.read_html(html)
         df1 = df_list1[-1]
         df = df.append(df1)
-    df.to_csv("covid.csv", index=False)
+    df.to_csv("raw_data.csv", index=False)
 
 
 
