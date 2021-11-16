@@ -10,7 +10,7 @@ def main():
     df_list = pd.read_html(html)
     df = df_list[-1]
     # Just printing the very first page
-    for i in range(638):
+    for i in range(647):
         url = 'https://koronavirus.gov.hu/elhunytak?page=' + str(i)
         # print(url)
         html = requests.get(url).content
