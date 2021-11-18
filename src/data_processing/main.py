@@ -2,6 +2,7 @@ import numpy as np
 import requests
 import pandas as pd
 import os
+import seaborn as sns
 
 
 def main():
