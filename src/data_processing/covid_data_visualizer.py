@@ -13,8 +13,12 @@ import seaborn as sns
 
 
 class DataProcessor:
-    def __init__(self, raw_data_path="data_processing/raw_data.csv",
-                 date_data_path="data_processing/dates.csv"):
+    def __init__(self, raw_data_path: str ="data_processing/raw_data.csv",
+                 date_data_path: str ="data_processing/dates.csv"):
+        """
+        :param str raw_data_path: path to raw_data data
+        :param str date_data_path: path to the date data
+        """
         self.raw_data_path = raw_data_path
         self.date_data_path = date_data_path
 
@@ -32,6 +36,10 @@ class DataProcessor:
 
     @staticmethod
     def download_data() -> None:
+        """
+        This method downloads the raw_data from the webpage and saves it as csv file
+        :return: None
+        """
         print("The download_data() method has started to run. It can take some time, please be patient")
         url = 'https://koronavirus.gov.hu/elhunytak'
         html = requests.get(url).content
@@ -48,7 +56,11 @@ class DataProcessor:
         df.to_csv("raw_data.csv", index=False)
         print("The download_data() method is done. Thank you for your time.")
 
-    def read_raw_data(self):
+    def read_raw_data(self) -> None:
+        """
+        This method reads the downloaded raw_data as a csv file
+        :return: None
+        """
         #path = self.raw_data_path
         df = pd.read_csv("raw_data.csv")
         df = df.drop(columns=["Sorszám", "Alapbetegségek"])
@@ -58,7 +70,11 @@ class DataProcessor:
         self.data = df
         print("read_raw_data method is done")
 
-    def get_date_data(self):
+    def get_date_data(self) -> None:
+        """
+        This method reads the data with the dates as a csv file
+        :return: None
+        """
         read_file = pd.DataFrame(pd.read_excel("dates.xlsx"))
         read_file.to_csv("dates.csv", index=None, header=True)
         df1 = pd.read_csv("dates.csv", usecols=['Dátum', 'Elhunytak', 'New Deaths'])
@@ -69,7 +85,12 @@ class DataProcessor:
         self.dates = df1
         print("get_date_data method is done!")
 
-    def get_data_with_dates(self):
+    def get_data_with_dates(self) -> None:
+        """
+        This method assigns a date for each of the rows in the previously downloaded
+        raw_data table.
+        :return: None
+        """
         repeat = self.dates["New Deaths"]
         data = pd.DataFrame(np.repeat(self.dates.values, repeat, axis=0), columns=self.dates.columns)
         new_data = pd.merge(data, self.data, left_index=True, right_index=True)
@@ -88,7 +109,12 @@ class DataProcessor:
         self.data_with_dates = data_with_dates
         print("get_data_with_dates method is done!")
 
-    def get_aggregated_data(self):
+    def get_aggregated_data(self) -> None:
+        """
+        This method aggregates our data into a table where the rows correspond to an age group and the columns
+        correspond to weeks
+        :return: None
+        """
         rep = pd.DataFrame(self.data_with_dates.groupby(pd.Grouper(freq='W', key='Dátum'))['Nem'].count())
         rep.reset_index(inplace=True)
         rep1 = rep["Nem"]
@@ -109,12 +135,20 @@ class DataProcessor:
         self.aggregated_data = aggregated_data
         print("get_aggregated_data method is done!")
 
-    def plot_heatmap(self):
+    def plot_heatmap(self) -> None:
+        """
+        This method creates a heatmap from the aggregated data
+        :return: None
+        """
         self.heatmap = sns.heatmap(self.aggregated_data)
         #plt.show()
         #return self.heatmap
 
-    def get_aggregated_data_ratio(self):
+    def get_aggregated_data_ratio(self) -> None:
+        """
+        This method creates a normalized version of the aggregated data obtained in the get_aggregated_data method
+        :return: None
+        """
         weekly = self.aggregated_data.columns
         rows = self.aggregated_data.index
         rows = rows.categories[:10]
@@ -139,10 +173,18 @@ class DataProcessor:
         print("get_aggregated_data_ratio method is done!")
 
 
-    def plot_normalized_data_heatmap(self):
+    def plot_normalized_data_heatmap(self) -> None:
+        """
+        This method creates a heatmap from the normalized aggregated data
+        :return: None
+        """
         self.normalized_data_heatmap = sns.heatmap(self.aggregated_data_ratio)
 
-    def get_population_pyramid_data(self):
+    def get_population_pyramid_data(self) -> None:
+        """
+        This method creates a data which contains the number of deceased patients for different ages
+        :return: None
+        """
         self.data["Nem"].replace({"férfi": "Férfi", "nõ": "Nõ", "Nő": "Nõ"}, inplace=True)
         self.data = self.data.groupby(list(self.data))[['Nem']].count()
         self.data = self.data.unstack(level=0)
@@ -153,14 +195,22 @@ class DataProcessor:
         self.data['Nõ'] = self.data['Nõ'].fillna(0)
         self.data["Férfi"] = - self.data["Férfi"]
 
-    def plot_population_pyramid_1(self):
+    def plot_population_pyramid_1(self) -> None:
+        """
+        This method creates a population pyramid from the table obtained in get_population_pyramid_data method
+        :return: None
+        """
         plt.barh(self.data["Kor"], self.data["Férfi"], color='r', lw=0, )
         plt.barh(self.data["Kor"], self.data["Nõ"], color='b', lw=0, )
         plt.title("Pyramid Age Distribution of Genders", fontsize=12)
         plt.xlabel("Male/Female")
         plt.show()
 
-    def plot_population_pyramid(self):
+    def plot_population_pyramid(self) -> None:
+        """
+        This method creates a population pyramid from the table obtained in get_population_pyramid_data method
+        :return: None
+        """
         #pio.renderers.default = 'png'
         fig = gp.Figure()
 
@@ -192,7 +242,7 @@ class DataProcessor:
 
 def main():
     p = DataProcessor()
-    p.download_data()
+    #p.download_data()
     p.read_raw_data()
     p.get_date_data()
     p.get_data_with_dates()
